@@ -69,3 +69,17 @@ calculate_fitted<-function(x,y){
   }
 }
 ```
+
+# which function is called
+
+```
+fun_seeker <- function(obj,fun) {
+  funs_to_check <- paste(fun,c(class(obj),"default"),sep=".")
+  funs_exists <- funs_to_check %in% methods(fun)
+  if (any(funs_exists)) funs_to_check[funs_exists][1] else stop("No applicable method")
+}
+fun_seeker(matrix(rnorm(100),10),"plot")
+fun_seeker(matrix(rnorm(100),10),"summary")
+
+fun_seeker(fit_tree,"plot")
+```
