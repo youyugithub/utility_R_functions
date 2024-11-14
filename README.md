@@ -83,3 +83,34 @@ fun_seeker(matrix(rnorm(100),10),"summary")
 
 fun_seeker(fit_tree,"plot")
 ```
+
+# Rcpp for dplyr
+
+```
+cppFunction('
+IntegerVector count_hits(LogicalVector x){
+  int n=x.length();
+  int count=0;
+  IntegerVector y(n,NA_INTEGER);
+  for(int i=0;i<n;i++){
+    if(LogicalVector::is_na(x[i]))continue;
+    if(!x[i])continue;
+    count++;
+    y[i]=count;
+  }
+  return(y);
+}')
+
+cppFunction('
+NumericVector cumsum_skip_na(NumericVector x){
+  int n=x.length();
+  double sum=0.0;
+  NumericVector y(n,NA_REAL);
+  for(int i=0;i<n;i++){
+    if(NumericVector::is_na(x[i]))continue;
+    sum+=x[i];
+    y[i]=sum;
+  }
+  return(y);
+}')
+```
