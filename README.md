@@ -113,4 +113,21 @@ NumericVector cumsum_skip_na(NumericVector x){
   }
   return(y);
 }')
+
+
+cppFunction('
+NumericVector lag_not_na_num(NumericVector x){
+  int n=x.length();
+  NumericVector y(n,NA_REAL);
+  int i=0,j=0;
+  for(i=0;i<n;i++){
+    for(j=i-1;j>=0;j--){
+      if(!NumericVector::is_na(x[j])){
+        y[i]=x[j];
+        break;
+      }
+    }
+  }
+  return(y);
+}')
 ```
