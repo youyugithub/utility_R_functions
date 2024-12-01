@@ -146,20 +146,33 @@ double first_num(NumericVector x,LogicalVector filter,int n=1){
 }')
 
 cppFunction('
-NumericVector lag_num(NumericVector x,LogicalVector filter){
+NumericVector lag_num(NumericVector x,LogicalVector filter,bool na_rm=false){
   int n=x.length();
   NumericVector y(n,NA_REAL);
   int i=0,j=0;
-  for(i=0;i<n;i++){
-    for(j=i-1;j>=0;j--){
-      if(!filter[j]){
-        y[i]=x[j];
-        break;
+  if(na_rm){
+    for(i=0;i<n;i++){
+      for(j=i-1;j>=0;j--){
+        if(LogicalVector::is_na(x[j]))continue;
+        if(filter[j]){
+          y[i]=x[j];
+          break;
+        }
+      }
+    }
+  }else{
+    for(i=0;i<n;i++){
+      for(j=i-1;j>=0;j--){
+        if(filter[j]){
+          y[i]=x[j];
+          break;
+        }
       }
     }
   }
   return(y);
 }')
+
 
 
 
