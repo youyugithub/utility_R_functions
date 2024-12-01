@@ -130,4 +130,37 @@ NumericVector lag_not_na_num(NumericVector x){
   }
   return(y);
 }')
+
+cppFunction('
+double first_num(NumericVector x,LogicalVector filter,int n=1){
+  int xlength=x.length();
+  double y=R_NaReal;
+  int i=0,count=0;
+  for(i=0;i<xlength;i++){
+    if(filter(i)){
+      count++;
+      if(count==n)y=x(i);
+    }
+  }
+  return(y);
+}')
+
+cppFunction('
+NumericVector lag_num(NumericVector x,LogicalVector filter){
+  int n=x.length();
+  NumericVector y(n,NA_REAL);
+  int i=0,j=0;
+  for(i=0;i<n;i++){
+    for(j=i-1;j>=0;j--){
+      if(!filter[j]){
+        y[i]=x[j];
+        break;
+      }
+    }
+  }
+  return(y);
+}')
+
+
+
 ```
