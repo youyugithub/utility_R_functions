@@ -174,6 +174,21 @@ NumericVector lag_num(NumericVector x,LogicalVector filter,bool na_rm=false){
 }')
 
 
+cppFunction('
+NumericVector lag_narm_num(NumericVector x){
+  int n=x.length();
+  NumericVector y(n,NA_REAL);
+  int i=0,j=0;
+  for(i=0;i<n;i++){
+    for(j=i-1;j>=0;j--){
+      if(!NumericVector::is_na(x[j])){
+        y[i]=x[j];
+        break;
+      }
+    }
+  }
+  return(y);
+}')
 
 
 ```
