@@ -192,3 +192,74 @@ NumericVector lag_narm_num(NumericVector x){
 
 
 ```
+
+
+
+```
+
+cppFunction('
+LogicalVector flag_smallest_n_cpp(
+    NumericVector x,
+    int n,
+    LogicalVector filter,
+    bool allow_tie,
+    NumericVector if_tie){
+  
+  int length=x.length();
+  NumericVector x_sort=x[filter];
+  x_sort=na_omit(x_sort).sort();
+  double x_thres;
+  LogicalVector result(length);
+  
+  if(x_sort.length()==0){
+    result.fill(false);
+    return(result);
+  }else if(x_sort.length()<n){
+    x_thres=x_sort(x_sort.length()-1);
+  }else{
+    x_thres=x_sort(n-1);
+  }
+  
+  int count=0;
+  int i;
+  for(i=0;i<length;i++){
+    if(x(i)<=x_thres&&filter(i)){
+      result(i)=true;
+      count++;
+    }else{
+      result(i)=false;
+    }
+  }
+  
+  if(count<=n)return(result);
+  if(allow_tie)return(result);
+  
+  NumericVector if_tie_sort=if_tie[result];
+  if_tie_sort=na_omit(if_tie_sort).sort();
+  double if_tie_thres;
+  LogicalVector result0(length);
+  
+  if(if_tie_sort.length()==0){
+    if_tie.fill(0.0);
+    if_tie_thres=0.0;
+  }else if(if_tie_sort.length()<n){
+    if_tie_thres=if_tie_sort(if_tie_sort.length()-1);
+  }else{
+    if_tie_thres=if_tie_sort(n-1);
+  }
+  
+  count=0;
+  for(i=0;i<length;i++){
+    if(result(i)&&if_tie(i)<=if_tie_thres&&count<n){
+      result0(i)=true;
+      count++;
+    }else{
+      result0(i)=false;
+    }
+  }
+  return(result0);
+}')
+
+flag_smallest_n(
+  c(NA,NA,NA,0,1,2,1,1,2),n=2,allow_tie=T)
+```
