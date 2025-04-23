@@ -263,3 +263,18 @@ LogicalVector flag_smallest_n_cpp(
 flag_smallest_n(
   c(NA,NA,NA,0,1,2,1,1,2),n=2,allow_tie=T)
 ```
+find the first true value
+```
+cppFunction('
+double value_at_true(NumericVector x,LogicalVector filter){
+  int n=x.length();
+  int i=0;
+  for(i=0;i<n;i++){
+    if(filter[i]){
+      return(x[i]);
+    }
+  }
+  return(NA_REAL);
+}
+')
+```
