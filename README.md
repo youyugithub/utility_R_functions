@@ -278,3 +278,13 @@ double value_at_true(NumericVector x,LogicalVector filter){
 }
 ')
 ```
+example
+```
+df<-data.frame(
+  id=c(1,1,1,1,1,2,2,2,2,2),
+  value=as.Date(c(1:5,1:5)),
+  filter=c(F,F,T,T,F,F,F,F,F,F))
+df%>%
+  group_by(id)%>%
+  mutate(x=as.Date(value_at_true(value,filter)))
+```
