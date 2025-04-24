@@ -320,3 +320,23 @@ LogicalVector whether_percent_increase_within_window(
   return(y);
 }')
 ```
+```
+cppFunction('
+NumericVector na_locf_num(
+    NumericVector x,
+    double x_default=NA_REAL) {
+  
+  int n=x.length();
+  int i=0;
+  double current=x_default;
+  for(i=0;i<n;i++){
+    if(NumericVector::is_na(x[i])){
+      x[i]=current;
+    }else{
+      current=x[i];
+    }
+  }
+  return(x);
+}
+')
+```
