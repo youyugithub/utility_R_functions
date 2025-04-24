@@ -340,3 +340,28 @@ NumericVector na_locf_num(
 }
 ')
 ```
+
+```
+cppFunction('
+IntegerVector n_consecutively_confirmed(
+    LogicalVector x) {
+  
+  int n=x.length();
+  int i=0;
+  int count=0;
+  IntegerVector y(n,NA_REAL);
+  for(i=0;i<n;i++){
+    if(LogicalVector::is_na(x[i])){
+      continue;
+    }else if(x[i]){
+      count++;
+      y[i]=count;
+    }else if(!x[i]){
+      count=0;
+      y[i]=count;
+    }
+  }
+  return(y);
+}
+')
+```
