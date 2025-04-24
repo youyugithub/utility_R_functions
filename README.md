@@ -288,3 +288,35 @@ df%>%
   group_by(id)%>%
   mutate(x=as.Date(value_at_true(value,filter)))
 ```
+
+
+```
+cppFunction('
+LogicalVector whether_percent_increase_within_window(
+    NumericVector x, 
+    NumericVector day,
+    double percent,
+    double window) {
+  
+  int n=x.length();
+  LogicalVector y(n,false);
+  int i=0,j=0;
+  
+  double percent1=percent+1.0;
+  for(i=0;i<n;i++){
+    if(NumericVector::is_na(x[i])){
+      y[i]=NA_LOGICAL;
+      continue;
+    }
+    for(j=i-1;j>=0;j--){
+      if(NumericVector::is_na(x[j]))continue;
+      if(std::abs(day[i]-day[j])>window)continue;
+      if(x[i]>=percent1*x[j]){
+        y[i]=true;
+        break;
+      }
+    }
+  }
+  return(y);
+}')
+```
