@@ -365,3 +365,69 @@ IntegerVector n_consecutively_confirmed(
 }
 ')
 ```
+
+```
+// [[Rcpp::export]]
+IntegerVector confirmed_multiple_aab( // are the last two non_na positive?
+    IntegerMatrix x) {
+  
+  int n=x.nrow();
+  int k=x.ncol();
+  int i,j;
+  IntegerVector prev1(k,NA_INTEGER);
+  IntegerVector prev2(k,NA_INTEGER);
+  int count_prev1,count_prev2;
+  IntegerVector multiple(n);
+  
+  Rcpp::Rcout<<n<<k;
+  for(i=0;i<n;i++){
+    for(j=0;j<k;j++){
+      if(!IntegerVector::is_na(x(i,j))){
+        prev2(j)=prev1(j);
+        prev1(j)=x(i,j);
+      }
+    }
+    count_prev1=0;
+    count_prev2=0;
+    for(j=0;j<k;j++){
+      if(prev1(j)>=1)count_prev1++;
+      if(prev2(j)>=1)count_prev2++;
+    }
+    if(count_prev1>=2&&count_prev2>=2){
+      multiple(i)=1;
+    }else{
+      multiple(i)=0;
+    }
+  }
+  return(multiple);
+}
+
+// [[Rcpp::export]]
+IntegerVector multiple_aab(
+    IntegerMatrix x) {
+  
+  int n=x.nrow();
+  int k=x.ncol();
+  int i,j;
+  IntegerVector prev1(k,NA_INTEGER);
+  int count_prev1;
+  IntegerVector multiple(n);
+  
+  Rcpp::Rcout<<n<<k;
+  for(i=0;i<n;i++){
+    for(j=0;j<k;j++){
+      if(!IntegerVector::is_na(x(i,j))){
+        prev1(j)=x(i,j);
+      }
+    }
+    count_prev1=0;
+    for(j=0;j<k;j++)if(prev1(j)>=1)count_prev1++;
+    if(count_prev1>=2){
+      multiple(i)=1;
+    }else{
+      multiple(i)=0;
+    }
+  }
+  return(multiple);
+}
+```
