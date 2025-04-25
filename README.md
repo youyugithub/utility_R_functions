@@ -402,7 +402,7 @@ IntegerVector confirmed_multiple_aab( // are the last two non_na positive?
 }
 
 // [[Rcpp::export]]
-IntegerVector multiple_aab(
+IntegerVector naab(
     IntegerMatrix x) {
   
   int n=x.nrow();
@@ -420,11 +420,7 @@ IntegerVector multiple_aab(
     }
     count_prev1=0;
     for(j=0;j<k;j++)if(prev1(j)>=1)count_prev1++;
-    if(count_prev1>=2){
-      multiple(i)=1;
-    }else{
-      multiple(i)=0;
-    }
+    multiple(i)=count_prev1;
   }
   return(multiple);
 }
