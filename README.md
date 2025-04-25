@@ -379,7 +379,6 @@ IntegerVector confirmed_multiple_aab( // are the last two non_na positive?
   int count_prev1,count_prev2;
   IntegerVector multiple(n);
   
-  Rcpp::Rcout<<n<<k;
   for(i=0;i<n;i++){
     for(j=0;j<k;j++){
       if(!IntegerVector::is_na(x(i,j))){
@@ -413,7 +412,6 @@ IntegerVector multiple_aab(
   int count_prev1;
   IntegerVector multiple(n);
   
-  Rcpp::Rcout<<n<<k;
   for(i=0;i<n;i++){
     for(j=0;j<k;j++){
       if(!IntegerVector::is_na(x(i,j))){
