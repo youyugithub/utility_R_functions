@@ -353,7 +353,7 @@ LogicalVector whether_percent_increase_within_window(
     }
     for(j=i-1;j>=0;j--){
       if(NumericVector::is_na(x[j]))continue;
-      if(std::abs(day[i]-day[j])>window)continue;
+      if(std::abs(day[i]-day[j])>window)break; // assume sorted day
       if(x[i]>=percent1*x[j]){
         y[i]=true;
         break;
@@ -362,7 +362,39 @@ LogicalVector whether_percent_increase_within_window(
   }
   return(y);
 }')
+
+cppFunction('
+NumericVector max_percent_increase_within_window(
+    NumericVector x, 
+    NumericVector day,
+    double window) {
+  
+  int n=x.length();
+  NumericVector y(n,NA_REAL);
+  int i=0,j=0;
+  double percent=1.0;
+  
+  for(i=0;i<n;i++){
+    if(NumericVector::is_na(x[i])){
+      y[i]=NA_LOGICAL;
+      continue;
+    }
+    percent=1.0;
+    for(j=i-1;j>=0;j--){
+      if(NumericVector::is_na(x[j]))continue;
+      if(std::abs(day[i]-day[j])>window)break;
+      if(x[i]/x[j]>=percent){
+        percent=x[i]/x[j];
+        y[i]=percent;
+      }
+    }
+  }
+  return(y);
+}')
 ```
+
+
+
 ```
 cppFunction('
 NumericVector na_locf_num(
