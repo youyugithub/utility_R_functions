@@ -298,12 +298,49 @@ df%>%
 
 ```
 cppFunction('
+NumericVector na_locf_within_window(
+    NumericVector x, 
+    NumericVector day,
+    double window,
+    double x_default=NA_REAL,
+    bool safe=true) {
+
+  if(safe){
+    window=window+1e-7; // avoid rounding errors
+  }
+
+  int n=x.length();
+  int i=0;
+  double current_x=x_default;
+  double current_day=NA_REAL;
+  for(i=0;i<n;i++){
+    if(NumericVector::is_na(x[i])){
+      if(std::abs(day[i]-current_day)<=window){
+        x[i]=current_x;
+      }else{
+        x[i]=x_default;
+      }
+    }else{
+      current_x=x[i];
+      current_day=day[i];
+    }
+  }
+  return(x);
+}')
+
+cppFunction('
 LogicalVector whether_percent_increase_within_window(
     NumericVector x, 
     NumericVector day,
     double percent,
-    double window) {
-  
+    double window,
+    bool safe=true) {
+
+  if(safe){
+    window=window+1e-7; // avoid rounding errors
+    percent=percent-1e-7; // avoid rounding errors
+  }
+
   int n=x.length();
   LogicalVector y(n,false);
   int i=0,j=0;
