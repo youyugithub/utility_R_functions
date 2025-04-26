@@ -131,6 +131,9 @@ NumericVector lag_not_na_num(NumericVector x){
   return(y);
 }')
 
+####################################
+# first_num REPLACED BY first_true #
+####################################
 cppFunction('
 double first_num(NumericVector x,LogicalVector filter,int n=1){
   int xlength=x.length();
@@ -265,6 +268,9 @@ flag_smallest_n(
 ```
 find the first true value
 ```
+########################################
+# value_at_true REPLACED BY first_true #
+########################################
 cppFunction('
 double value_at_true(NumericVector x,LogicalVector filter){
   int n=x.length();
@@ -424,4 +430,37 @@ IntegerVector naab(
   }
   return(multiple);
 }
+```
+
+
+
+```
+cppFunction('
+double first_true(NumericVector x,LogicalVector filter,int n=1){
+  int xlength=x.length();
+  double y=R_NaReal;
+  int i=0,count=0;
+  for(i=0;i<xlength;i++){
+    if(filter(i)){
+      count++;
+      if(count==n)y=x(i);
+    }
+  }
+  return(y);
+}')
+
+cppFunction('
+double last_true(NumericVector x,LogicalVector filter,int n=1){
+  int xlength=x.length();
+  double y=R_NaReal;
+  int i=0,count=0;
+  for(i=xlength-1;i>=0;i--){
+    if(filter(i)){
+      count++;
+      if(count==n)y=x(i);
+    }
+  }
+  return(y);
+}')
+
 ```
