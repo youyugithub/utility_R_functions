@@ -380,6 +380,7 @@ NumericVector max_percent_increase_within_window(
       continue;
     }
     percent=1.0;
+    y[i]=percent;
     for(j=i-1;j>=0;j--){
       if(NumericVector::is_na(x[j]))continue;
       if(std::abs(day[i]-day[j])>window)break;
