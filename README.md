@@ -534,3 +534,33 @@ double last_true(NumericVector x,LogicalVector filter,int n=1){
 }')
 
 ```
+
+```
+cppFunction('
+LogicalVector filter_first_true(LogicalVector filter,int n=1){
+  int xlength=filter.length();
+  LogicalVector y(xlength,false);
+  int i=0,count=0;
+  for(i=0;i<xlength;i++){
+    if(filter(i)){
+      count++;
+      if(count==n)y[i]=true;
+    }
+  }
+  return(y);
+}')
+
+cppFunction('
+LogicalVector filter_last_true(LogicalVector filter,int n=1){
+  int xlength=filter.length();
+  LogicalVector y(xlength,false);
+  int i=0,count=0;
+  for(i=xlength-1;i>=0;i--){
+    if(filter(i)){
+      count++;
+      if(count==n)y[i]=true;
+    }
+  }
+  return(y);
+}')
+```
