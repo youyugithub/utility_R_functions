@@ -564,3 +564,64 @@ LogicalVector filter_last_true(LogicalVector filter,int n=1){
   return(y);
 }')
 ```
+
+
+
+```
+cppFunction('
+NumericVector max_within_window(
+    NumericVector x, 
+    NumericVector day,
+    double window_from=0.0,
+    double window_to=0.0,
+    bool safe=true) {
+
+  if(safe){
+    window_from=window_from-1e-7; // avoid rounding errors
+    window_to=window_to+1e-7; // avoid rounding errors
+  }
+
+  int n=x.length();
+  NumericVector y(n,R_NegInf);
+  int i=0,j=0;
+  
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      if(NumericVector::is_na(x[j]))continue;
+      if(day[j]-day[i]>window_to)continue;
+      if(day[j]-day[i]<window_from)continue;
+      if(x[j]>=y[i])y[i]=x[j];
+    }
+  }
+  return(y);
+}')
+
+
+cppFunction('
+NumericVector min_within_window(
+    NumericVector x,
+    NumericVector day,
+    double window_from=0.0,
+    double window_to=0.0,
+    bool safe=true) {
+
+  if(safe){
+    window_from=window_from-1e-7; // avoid rounding errors
+    window_to=window_to+1e-7; // avoid rounding errors
+  }
+
+  int n=x.length();
+  NumericVector y(n,R_PosInf);
+  int i=0,j=0;
+  
+  for(i=0;i<n;i++){
+    for(j=0;j<n;j++){
+      if(NumericVector::is_na(x[j]))continue;
+      if(day[j]-day[i]>window_to)continue;
+      if(day[j]-day[i]<window_from)continue;
+      if(x[j]<=y[i])y[i]=x[j];
+    }
+  }
+  return(y);
+}')
+```
