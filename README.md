@@ -567,14 +567,14 @@ LogicalVector filter_last_true(LogicalVector filter,int n=1){
 
 
 
-```
-cppFunction('
+```cppFunction('
 NumericVector max_within_window(
     NumericVector x, 
     NumericVector day,
     double window_from=0.0,
     double window_to=0.0,
-    bool safe=true) {
+    bool safe=true,
+    bool inf_to_na=true) {
 
   if(safe){
     window_from=window_from-1e-7; // avoid rounding errors
@@ -593,6 +593,11 @@ NumericVector max_within_window(
       if(x[j]>=y[i])y[i]=x[j];
     }
   }
+  if(inf_to_na){
+    for(i=0;i<n;i++){
+      if(std::isinf(y[i]))y[i]=NA_REAL;
+    }
+  }
   return(y);
 }')
 
@@ -603,7 +608,8 @@ NumericVector min_within_window(
     NumericVector day,
     double window_from=0.0,
     double window_to=0.0,
-    bool safe=true) {
+    bool safe=true,
+    bool inf_to_na=true) {
 
   if(safe){
     window_from=window_from-1e-7; // avoid rounding errors
@@ -620,6 +626,11 @@ NumericVector min_within_window(
       if(day[j]-day[i]>window_to)continue;
       if(day[j]-day[i]<window_from)continue;
       if(x[j]<=y[i])y[i]=x[j];
+    }
+  }
+  if(inf_to_na){
+    for(i=0;i<n;i++){
+      if(std::isinf(y[i]))y[i]=NA_REAL;
     }
   }
   return(y);
