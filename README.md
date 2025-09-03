@@ -276,7 +276,7 @@ double value_at_true(NumericVector x,LogicalVector filter){
   int n=x.length();
   int i=0;
   for(i=0;i<n;i++){
-    if(filter[i]){
+    if(filter[i]==TRUE){
       return(x[i]);
     }
   }
