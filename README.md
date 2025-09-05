@@ -542,7 +542,7 @@ LogicalVector filter_first_true(LogicalVector filter,int n=1){
   LogicalVector y(xlength,false);
   int i=0,count=0;
   for(i=0;i<xlength;i++){
-    if(filter(i)){
+    if(filter(i)==true){
       count++;
       if(count==n)y[i]=true;
     }
@@ -556,7 +556,7 @@ LogicalVector filter_last_true(LogicalVector filter,int n=1){
   LogicalVector y(xlength,false);
   int i=0,count=0;
   for(i=xlength-1;i>=0;i--){
-    if(filter(i)){
+    if(filter(i)==true){
       count++;
       if(count==n)y[i]=true;
     }
