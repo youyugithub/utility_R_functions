@@ -636,3 +636,21 @@ NumericVector min_within_window(
   return(y);
 }')
 ```
+
+
+```
+cppFunction('
+IntegerVector seq_from_origin(LogicalVector cond){
+  int n=cond.length();
+  IntegerVector out(n, NA_INTEGER);
+  int origin=-1;
+  int i=0;
+  for(i=0;i<n;++i){
+    if(cond[i]==TRUE){origin=i;break;}
+  }
+  if(origin==-1) return out;
+  for(i=0;i<n;++i)out[i]=i-origin;
+  return(out);
+}
+')
+```
