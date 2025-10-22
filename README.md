@@ -511,7 +511,7 @@ double first_true(NumericVector x,LogicalVector filter,int n=1){
   double y=R_NaReal;
   int i=0,count=0;
   for(i=0;i<xlength;i++){
-    if(filter(i)){
+    if(filter(i)==true){
       count++;
       if(count==n)y=x(i);
     }
@@ -525,7 +525,7 @@ double last_true(NumericVector x,LogicalVector filter,int n=1){
   double y=R_NaReal;
   int i=0,count=0;
   for(i=xlength-1;i>=0;i--){
-    if(filter(i)){
+    if(filter(i)==true){
       count++;
       if(count==n)y=x(i);
     }
