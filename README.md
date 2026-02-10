@@ -657,11 +657,15 @@ IntegerVector seq_from_origin(LogicalVector cond){
 
 ```
 cppFunction('
+// !!! missing in v not allowed
 NumericVector round_to_nearest(NumericVector x, NumericVector v) {
-  if (v.size() == 0) stop("v is empty");
-  NumericVector out(x.size());
+  int n = x.size();
+  int m = v.size();
+  if (m == 0) stop("v is empty");
+  NumericVector out(n, NA_REAL);
   
   for (int i = 0; i < x.size(); i++) {
+    if (NumericVector::is_na(x[i])) continue;
     double best = v[0], d0 = std::abs(x[i] - best);
     for (int j = 1; j < v.size(); j++) {
       double d = std::abs(x[i] - v[j]);
@@ -672,4 +676,58 @@ NumericVector round_to_nearest(NumericVector x, NumericVector v) {
   return out;
 }
 ')
+
+cppFunction('
+// !!! missing in v not allowed
+NumericVector round_to_nearest_unique(NumericVector x,
+                                      NumericVector v) {
+
+  int n = x.size();
+  int m = v.size();
+  if (m == 0) stop("v is empty");
+
+  IntegerVector idx(n, -1);
+  NumericVector dist(n, NA_REAL);
+  NumericVector out = clone(x);
+
+  // Step 1: nearest v for each x
+  for (int i = 0; i < n; i++) {
+    if (NumericVector::is_na(x[i])) continue;
+
+    int best_j = 0;
+    double best_d = std::abs(x[i] - v[0]);
+
+    for (int j = 1; j < m; j++) {
+      double d = std::abs(x[i] - v[j]);
+      if (d < best_d) {
+        best_d = d;
+        best_j = j;
+      }
+    }
+
+    idx[i]  = best_j;
+    dist[i] = best_d;
+  }
+
+  // Step 2: for each v, keep only the closest x
+  IntegerVector keep(m, -1);
+  for (int i = 0; i < n; i++) {
+    if (idx[i] == -1) continue;
+    int j = idx[i];
+    if (keep[j] == -1 || dist[i] < dist[keep[j]]) {
+      keep[j] = i;
+    }
+  }
+
+  // Step 3: winners → v, others unchanged
+  for (int j = 0; j < m; j++) {
+    if (keep[j] != -1) {
+      out[keep[j]] = v[j];
+    }
+  }
+
+  return out;
+}
+')
+
 ```
