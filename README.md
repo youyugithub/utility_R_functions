@@ -654,3 +654,22 @@ IntegerVector seq_from_origin(LogicalVector cond){
 }
 ')
 ```
+
+```
+cppFunction('
+NumericVector round_to_nearest(NumericVector x, NumericVector v) {
+  if (v.size() == 0) stop("v is empty");
+  NumericVector out(x.size());
+  
+  for (int i = 0; i < x.size(); i++) {
+    double best = v[0], d0 = std::abs(x[i] - best);
+    for (int j = 1; j < v.size(); j++) {
+      double d = std::abs(x[i] - v[j]);
+      if (d < d0) best = v[j], d0 = d;
+    }
+    out[i] = best;
+  }
+  return out;
+}
+')
+```
