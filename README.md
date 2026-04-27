@@ -731,3 +731,55 @@ NumericVector round_to_nearest_unique(NumericVector x,
 ')
 
 ```
+
+
+```
+join_locf_rev <- function(df_a, df_b, by_id = "id", by_date = c("date" = "date"), suffix = c(".x", ".y")) {
+  
+  # 1. Standardize the 'by' arguments (handling named vectors like join_by)
+  # Normalize by_id: c("id_a" = "id_b") -> id_a is key in A, id_b is key in B
+  id_a <- if (!is.null(names(by_id))) names(by_id) else by_id
+  id_b <- unname(by_id)
+  
+  # Normalize by_date: c("date_a" = "date_b")
+  date_a <- if (!is.null(names(by_date))) names(by_date) else by_date
+  date_b <- unname(by_date)
+  
+  # Determine what the B-date column will be called after suffixing
+  # If by_date is c("date" = "date"), A's date remains "date", B's becomes "date_b"
+  date_a_suffix <- if (date_a == date_b) paste0(date_a, suffix[1]) else date_a
+  date_b_suffix <- if (date_a == date_b) paste0(date_b, suffix[2]) else date_b
+  
+  df_a <- df_a%>%rename(!!date_a_suffix:=!!date_a)
+  df_b <- df_b%>%rename(!!date_b_suffix:=!!date_b)
+  
+  # 2. Primary Join: LOCF
+  # Finds most recent B_date <= A_date
+  step1 <- df_a %>% left_join(df_b, by = join_by(!!id_a == !!id_b, closest(!!date_a_suffix >= !!date_b_suffix)))
+  
+  # 3. Split based on match success
+  # We use .data[[name]] for robust column referencing
+  step1_found <- step1 %>% filter(!is.na(.data[[date_b_suffix]]))
+  step1_notfound <- step1 %>% filter(is.na(.data[[date_b_suffix]]))
+  
+  # 4. Fallback: Identify the earliest record for every ID in B
+  df_b_first <- df_b %>%
+    group_by(.data[[id_b]]) %>%
+    filter(.data[[date_b_suffix]] == min(.data[[date_b_suffix]], na.rm = TRUE)) %>%
+    slice(1) %>%
+    ungroup()
+  
+  # 5. Apply Fallback to the "not found" subset
+  # We select only columns from A to avoid "duplicate column" errors during join
+  step2_fallback <- 
+    step1_notfound %>%
+    select(all_of(names(df_a))) %>%
+    left_join(
+      df_b_first, 
+      by = setNames(id_b, id_a))
+  
+  # 6. Recombine and return
+  bind_rows(step1_found, step2_fallback)%>%
+    arrange(!!id_a,!!date_a_suffix)
+}
+```
