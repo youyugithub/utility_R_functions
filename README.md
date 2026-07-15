@@ -193,6 +193,23 @@ NumericVector lag_narm_num(NumericVector x){
   return(y);
 }')
 
+Rcpp::cppFunction('
+NumericVector lead_narm_num(NumericVector x) {
+  int n = x.length();
+  NumericVector y(n, NA_REAL);
+
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      if (!NumericVector::is_na(x[j])) {
+        y[i] = x[j];
+        break;
+      }
+    }
+  }
+
+  return y;
+}')
+
 
 ```
 
