@@ -800,3 +800,111 @@ join_locf_rev <- function(df_a, df_b, by_id = "id", by_date = c("date" = "date")
     arrange(!!id_a,!!date_a_suffix)
 }
 ```
+
+## Wilcoxon test with weights
+
+```
+cppFunction('
+Rcpp::List wilcox_weighted_cpp(Rcpp::NumericVector y,
+                               Rcpp::LogicalVector group,
+                               Rcpp::NumericVector weight) {
+
+  int n = y.size();
+
+  if (group.size() != n || weight.size() != n)
+    Rcpp::stop("y, group, and weight must have the same length.");
+
+  std::vector<int> ord(n);
+  for (int i = 0; i < n; ++i) ord[i] = i;
+
+  std::sort(ord.begin(), ord.end(),
+            [&](int a, int b) { return y[a] < y[b]; });
+
+  double Wtot = 0.0, WA = 0.0, WB = 0.0;
+
+  for (int i = 0; i < n; ++i) {
+    if (weight[i] < 0)
+      Rcpp::stop("Weights must be nonnegative.");
+
+    Wtot += weight[i];
+
+    if (group[i]) WA += weight[i];
+    else          WB += weight[i];
+  }
+
+  if (Wtot <= 1.0 || WA <= 0.0 || WB <= 0.0)
+    Rcpp::stop("Insufficient positive total weight.");
+
+  Rcpp::NumericVector rank(n);
+  double tie_sum = 0.0;
+  double cum_w = 0.0;
+
+  int start = 0;
+
+  while (start < n) {
+
+    int end = start;
+
+    while (end + 1 < n &&
+           y[ord[end + 1]] == y[ord[start]]) {
+      ++end;
+    }
+
+    double tie_w = 0.0;
+
+    for (int k = start; k <= end; ++k)
+      tie_w += weight[ord[k]];
+
+    // Weighted midrank:
+    // tied group occupies positions cum_w + 1, ..., cum_w + tie_w
+    double midrank =
+      cum_w + (tie_w + 1.0) / 2.0;
+
+    for (int k = start; k <= end; ++k)
+      rank[ord[k]] = midrank;
+
+    tie_sum += tie_w * (tie_w * tie_w - 1.0);
+
+    cum_w += tie_w;
+    start = end + 1;
+  }
+
+  double rank_sum_A = 0.0;
+
+  for (int i = 0; i < n; ++i)
+    if (group[i])
+      rank_sum_A += weight[i] * rank[i];
+
+  double expected =
+    WA * (Wtot + 1.0) / 2.0;
+
+  double variance =
+    (WA * WB / 12.0) *
+    ((Wtot + 1.0) -
+     tie_sum / (Wtot * (Wtot - 1.0)));
+
+  double z = NA_REAL;
+
+  if (variance > 0.0)
+    z = (rank_sum_A - expected) /
+        std::sqrt(variance);
+
+  double U =
+    rank_sum_A -
+    WA * (WA + 1.0) / 2.0;
+
+  return Rcpp::List::create(
+    Rcpp::_["rank_sum"] = rank_sum_A,
+    Rcpp::_["U"] = U,
+    Rcpp::_["expected"] = expected,
+    Rcpp::_["variance"] = variance,
+    Rcpp::_["z"] = z,
+    Rcpp::_["WA"] = WA,
+    Rcpp::_["WB"] = WB,
+    Rcpp::_["Wtot"] = Wtot,
+    Rcpp::_["tie_sum"] = tie_sum,
+    Rcpp::_["ranks"] = rank
+  );
+}
+')
+```
