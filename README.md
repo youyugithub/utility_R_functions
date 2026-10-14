@@ -747,6 +747,77 @@ NumericVector round_to_nearest_unique(NumericVector x,
 }
 ')
 
+cppFunction('
+// v must contain only positive, non-missing values
+NumericVector round_to_nearest_unique_baseline(
+    NumericVector x,
+    NumericVector v) {
+
+  int n = x.size();
+  int m = v.size();
+  if (m == 0) stop("v is empty");
+
+  IntegerVector idx(n, -1);
+  NumericVector dist(n, NA_REAL);
+  NumericVector out = clone(x);
+
+  int keep_baseline = -1;
+
+  // Step 1: identify baseline and nearest v for each x
+  for (int i = 0; i < n; i++) {
+    if (NumericVector::is_na(x[i])) continue;
+
+    if (x[i] <= 0.0) {
+      if (keep_baseline == -1 ||
+          x[i] > x[keep_baseline]) {
+        keep_baseline = i;
+      }
+      continue;
+    }
+
+    int best_j = 0;
+    double best_d = std::abs(x[i] - v[0]);
+
+    for (int j = 1; j < m; j++) {
+      double d = std::abs(x[i] - v[j]);
+      if (d < best_d) {
+        best_d = d;
+        best_j = j;
+      }
+    }
+
+    idx[i]  = best_j;
+    dist[i] = best_d;
+  }
+
+  // Step 2: for each v, keep only the closest x
+  IntegerVector keep(m, -1);
+
+  for (int i = 0; i < n; i++) {
+    if (idx[i] < 0) continue;
+
+    int j = idx[i];
+    if (keep[j] == -1 || dist[i] < dist[keep[j]]) {
+      keep[j] = i;
+    }
+  }
+
+  // Step 3: winners → scheduled times, others unchanged
+  if (keep_baseline != -1) {
+    out[keep_baseline] = 0.0;
+  }
+
+  for (int j = 0; j < m; j++) {
+    if (keep[j] != -1) {
+      out[keep[j]] = v[j];
+    }
+  }
+
+  return out;
+}
+')
+
+
 ```
 
 
